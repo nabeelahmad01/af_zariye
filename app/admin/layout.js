@@ -23,6 +23,8 @@ export default function AdminLayout({ children }) {
     { href: '/admin/products', label: '📦 Products' },
     { href: '/admin/collections', label: '🏷️ Collections' },
     { href: '/admin/orders', label: '🛒 Orders' },
+    { href: '/admin/coupons', label: '🎟️ Coupons' },
+    { href: '/admin/reviews', label: '⭐ Reviews' },
     { href: '/admin/newsletter', label: '📧 Newsletter' },
   ];
 

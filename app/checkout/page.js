@@ -9,13 +9,44 @@ export default function CheckoutPage() {
   const { addToast } = useToast();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [couponCode, setCouponCode] = useState('');
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponLoading, setCouponLoading] = useState(false);
   const [form, setForm] = useState({
     name: '', email: '', phone: '', street: '', city: '', state: '', zip: '', paymentMethod: 'cod', notes: '',
   });
 
   const shipping = cartTotal >= 5000 ? 0 : 200;
-  const total = cartTotal + shipping;
+  const total = cartTotal - couponDiscount + shipping;
   const u = (k, v) => setForm(p => ({ ...p, [k]: v }));
+
+  const applyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setCouponLoading(true);
+    try {
+      const res = await fetch('/api/coupons', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'validate', code: couponCode, orderTotal: cartTotal }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setCouponDiscount(data.coupon.discount);
+        setAppliedCoupon(data.coupon);
+        addToast(`Coupon applied! -PKR ${data.coupon.discount.toLocaleString()} 🎉`, 'success');
+      } else {
+        addToast(data.error, 'error');
+      }
+    } catch { addToast('Failed to apply coupon', 'error'); }
+    setCouponLoading(false);
+  };
+
+  const removeCoupon = () => {
+    setCouponDiscount(0);
+    setAppliedCoupon(null);
+    setCouponCode('');
+    addToast('Coupon removed', 'info');
+  };
 
   const handleOrder = async (e) => {
     e.preventDefault();
@@ -25,7 +56,7 @@ export default function CheckoutPage() {
       const orderData = {
         customerInfo: { name: form.name, email: form.email, phone: form.phone, address: { street: form.street, city: form.city, state: form.state, zip: form.zip } },
         items: cart.map(item => ({ product: item._id, name: item.name, image: item.image, price: item.price, size: item.size, color: item.color, quantity: item.quantity })),
-        subtotal: cartTotal, shippingCost: shipping, total, paymentMethod: form.paymentMethod, notes: form.notes,
+        subtotal: cartTotal, shippingCost: shipping, couponCode: appliedCoupon?.code || '', couponDiscount, total, paymentMethod: form.paymentMethod, notes: form.notes,
       };
       const res = await fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(orderData) });
       const data = await res.json();
@@ -73,7 +104,7 @@ export default function CheckoutPage() {
             </div>
             <div className="checkout-section">
               <h3>Payment Method</h3>
-              {[['cod', '💵 Cash on Delivery'], ['bank_transfer', '🏦 Bank Transfer']].map(([val, label]) => (
+              {[['cod', '💵 Cash on Delivery'], ['bank_transfer', '🏦 Bank Transfer'], ['jazzcash', '📱 JazzCash'], ['easypaisa', '📱 EasyPaisa']].map(([val, label]) => (
                 <label key={val} className="filter-option" style={{ cursor: 'pointer', padding: '12px', border: '1px solid var(--border)', borderRadius: 'var(--radius)', marginBottom: '8px', background: form.paymentMethod === val ? 'var(--bg-alt)' : '' }}>
                   <input type="radio" name="payment" value={val} checked={form.paymentMethod === val} onChange={e => u('paymentMethod', e.target.value)} />
                   {label}
@@ -95,7 +126,27 @@ export default function CheckoutPage() {
                   <p style={{ fontWeight: '600', fontSize: '14px' }}>PKR {(item.price * item.quantity).toLocaleString()}</p>
                 </div>
               ))}
+
+              {/* Coupon Code */}
+              <div style={{ padding: '16px 0', borderBottom: '1px solid var(--border-light)' }}>
+                {appliedCoupon ? (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: '#d4edda', borderRadius: 'var(--radius)' }}>
+                    <span style={{ fontSize: '13px', fontWeight: '600', color: '#155724' }}>🎉 {appliedCoupon.code} applied</span>
+                    <button type="button" onClick={removeCoupon} style={{ fontSize: '12px', color: '#721c24', fontWeight: '600', background: 'none', border: 'none', cursor: 'pointer' }}>Remove</button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <input type="text" value={couponCode} onChange={e => setCouponCode(e.target.value.toUpperCase())} placeholder="Coupon code" style={{ flex: 1, padding: '10px 14px', border: '1px solid var(--border)', borderRadius: 'var(--radius)', fontSize: '13px', textTransform: 'uppercase' }} />
+                    <button type="button" onClick={applyCoupon} disabled={couponLoading}
+                      style={{ padding: '10px 16px', background: 'var(--primary)', color: '#fff', fontSize: '12px', fontWeight: '600', borderRadius: 'var(--radius)', whiteSpace: 'nowrap' }}>
+                      {couponLoading ? '...' : 'Apply'}
+                    </button>
+                  </div>
+                )}
+              </div>
+
               <div className="summary-row"><span>Subtotal</span><span>PKR {cartTotal.toLocaleString()}</span></div>
+              {couponDiscount > 0 && <div className="summary-row" style={{ color: 'var(--success)' }}><span>Discount</span><span>-PKR {couponDiscount.toLocaleString()}</span></div>}
               <div className="summary-row"><span>Shipping</span><span>{shipping === 0 ? 'Free' : `PKR ${shipping}`}</span></div>
               <div className="summary-total"><span>Total</span><span>PKR {total.toLocaleString()}</span></div>
               <button type="submit" className="btn-checkout" style={{ marginTop: '16px' }} disabled={loading}>

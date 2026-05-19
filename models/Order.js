@@ -78,8 +78,16 @@ const orderSchema = new mongoose.Schema({
   trackingHistory: [trackingSchema],
   paymentMethod: {
     type: String,
-    enum: ['cod', 'bank_transfer'],
+    enum: ['cod', 'bank_transfer', 'jazzcash', 'easypaisa'],
     default: 'cod',
+  },
+  couponCode: {
+    type: String,
+    default: '',
+  },
+  couponDiscount: {
+    type: Number,
+    default: 0,
   },
   notes: {
     type: String,

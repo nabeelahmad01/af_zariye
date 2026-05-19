@@ -26,8 +26,11 @@ export default function ProductCard({ product }) {
           {product.images?.[1] && (
             <img src={product.images[1].url} alt={product.name} className="product-card-hover-img" loading="lazy" />
           )}
-          {discount > 0 && <span className="product-badge sale">-{discount}%</span>}
-          {product.featured && <span className="product-badge new">NEW</span>}
+          {discount > 0 ? (
+            <span className="product-badge sale">-{discount}%</span>
+          ) : product.featured ? (
+            <span className="product-badge new">NEW</span>
+          ) : null}
           {product.stock <= 0 && <div className="product-sold-out">Sold Out</div>}
           <button className="quick-add-btn" onClick={handleQuickAdd} disabled={product.stock <= 0}>
             {product.stock > 0 ? 'Quick Add' : 'Sold Out'}
@@ -37,10 +40,12 @@ export default function ProductCard({ product }) {
           <p className="product-card-category">{product.category}</p>
           <h3 className="product-card-name">{product.name}</h3>
           <div className="product-card-prices">
-            <span className="product-card-price">PKR {product.price?.toLocaleString()}</span>
             {product.comparePrice > product.price && (
               <span className="product-card-compare">PKR {product.comparePrice?.toLocaleString()}</span>
             )}
+            <span className={`product-card-price ${product.comparePrice > product.price ? 'sale-price' : ''}`}>
+              PKR {product.price?.toLocaleString()}
+            </span>
           </div>
           {product.colors?.length > 0 && (
             <div className="product-card-colors">

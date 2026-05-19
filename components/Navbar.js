@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useCart } from "../context/CartContext";
 
@@ -10,6 +11,8 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const router = useRouter();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -44,8 +47,7 @@ export default function Navbar() {
 
           {/* Logo */}
           <Link href="/" className="nav-logo">
-            <span className="logo-text">AF</span>
-            <span className="logo-sub">ZARIYE</span>
+            <img src="/logo.png" alt="AF Zariye Logo" className="site-logo" />
           </Link>
 
           {/* Desktop Navigation */}
@@ -56,9 +58,14 @@ export default function Navbar() {
             <Link href="/collections" onClick={() => setMenuOpen(false)}>
               Collections
             </Link>
-
+            <Link href="/about" onClick={() => setMenuOpen(false)}>
+              About
+            </Link>
             <Link href="/contact" onClick={() => setMenuOpen(false)}>
               Contact
+            </Link>
+            <Link href="/my-orders" onClick={() => setMenuOpen(false)}>
+              My Orders
             </Link>
             <Link href="/track-order" onClick={() => setMenuOpen(false)}>
               Track Order
@@ -155,12 +162,16 @@ export default function Navbar() {
         {searchOpen && (
           <div className="search-overlay">
             <div className="search-container">
+              <form onSubmit={(e) => { e.preventDefault(); if (searchQuery.trim()) { router.push(`/shop?search=${encodeURIComponent(searchQuery.trim())}`); setSearchOpen(false); setSearchQuery(''); } }}>
               <input
                 type="text"
                 placeholder="Search products..."
                 autoFocus
                 className="search-input"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
+              </form>
               <button
                 className="search-close"
                 onClick={() => setSearchOpen(false)}

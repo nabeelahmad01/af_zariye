@@ -153,10 +153,18 @@ async function seed() {
   const products = await Product.insertMany(productsData);
   console.log(`✅ Created ${products.length} products`);
 
+  const Coupon = mongoose.models.Coupon || mongoose.model('Coupon', new mongoose.Schema({
+    code: String, discountType: String, discountValue: Number, isActive: Boolean
+  }));
+  await Coupon.deleteMany({});
+  await Coupon.create({ code: 'ZARIYE10', discountType: 'percentage', discountValue: 10, isActive: true });
+  console.log('✅ Created sample coupon: ZARIYE10 (10% OFF)');
+
   await mongoose.disconnect();
   console.log('\n🎉 Seed complete! Your store is ready.');
   console.log('   - 4 Collections (3 featured)');
   console.log('   - 12 Products (8 featured)');
+  console.log('   - 1 Coupon (ZARIYE10)');
   console.log('   - Admin: admin@afzariye.com / admin123');
 }
 

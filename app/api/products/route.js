@@ -18,7 +18,14 @@ export async function GET(request) {
     if (featured === 'true') query.featured = true;
     if (category) query.category = category;
     if (collection) query.collection = collection;
-    if (search) query.name = { $regex: search, $options: 'i' };
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+        { category: { $regex: search, $options: 'i' } },
+        { tags: { $regex: search, $options: 'i' } },
+      ];
+    }
 
     const total = await Product.countDocuments(query);
     const products = await Product.find(query)

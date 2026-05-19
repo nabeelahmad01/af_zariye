@@ -81,18 +81,6 @@ select {
   padding: 0 clamp(20px, 5vw, 80px);
 }
 
-/* Ensure main content has breathing room */
-main > section,
-main > div:not(.page-banner):not(.hero-section):not(.cta-banner) {
-  padding-left: clamp(20px, 5vw, 80px);
-  padding-right: clamp(20px, 5vw, 80px);
-}
-main > section .container,
-main > div .container {
-  padding-left: 0;
-  padding-right: 0;
-}
-
 /* ===== BUTTONS ===== */
 .btn-primary {
   display: inline-flex;
@@ -216,12 +204,14 @@ main > div .container {
   align-items: center;
   gap: 0;
 }
-.logo-text {
-  font-family: var(--font-heading);
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: 6px;
-  line-height: 1;
+.site-logo {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+}
+.site-logo:hover {
+  transform: scale(1.05);
 }
 .logo-sub {
   font-size: 10px;

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '../../../lib/mongodb';
 import Order from '../../../models/Order';
+import Product from '../../../models/Product';
 
 function generateOrderId() {
   const year = new Date().getFullYear();
@@ -33,6 +34,22 @@ export async function POST(request) {
     const data = await request.json();
     data.orderId = generateOrderId();
     data.trackingHistory = [{ status: 'pending', message: 'Order placed successfully', timestamp: new Date() }];
+
+    // Validate stock availability before creating order
+    for (const item of data.items) {
+      const product = await Product.findById(item.product);
+      if (!product) {
+        return NextResponse.json({ error: `Product "${item.name}" not found` }, { status: 400 });
+      }
+      if (product.stock < item.quantity) {
+        return NextResponse.json({ error: `"${item.name}" has only ${product.stock} in stock` }, { status: 400 });
+      }
+    }
+
+    // Deduct stock
+    for (const item of data.items) {
+      await Product.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity } });
+    }
 
     const order = await Order.create(data);
     return NextResponse.json({ order, orderId: order.orderId }, { status: 201 });
