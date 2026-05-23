@@ -39,7 +39,7 @@ export default function TrackOrderPage() {
       </div>
       <section className="track-page container">
         <form onSubmit={handleTrack} className="track-form">
-          <input type="text" value={orderId} onChange={e => setOrderId(e.target.value)} placeholder="Enter Order ID (e.g., AFZ-2024-1234)" className="form-group" style={{ padding: '14px 20px', border: '1px solid var(--border)', borderRadius: 'var(--radius)', fontSize: '14px' }} required />
+          <input type="text" value={orderId} onChange={e => setOrderId(e.target.value)} placeholder="Enter Order ID (e.g., AFZ-2024-1234)" className="form-group" style={{ padding: '14px 20px', border: '1px solid var(--border)', borderRadius: 'var(--radius)', fontSize: '14px',marginBottom:0 }} required />
           <button type="submit" className="btn-primary" disabled={loading}>{loading ? 'Tracking...' : 'Track'}</button>
         </form>
 

@@ -4,6 +4,15 @@ import Collection from '../../models/Collection';
 
 const BASE_URL = process.env.NEXTAUTH_URL || 'https://af-zariye.vercel.app';
 
+const safeIsoDate = (dateVal) => {
+  try {
+    const d = dateVal ? new Date(dateVal) : new Date();
+    return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
+  } catch (e) {
+    return new Date().toISOString();
+  }
+};
+
 export async function GET() {
   await dbConnect();
 
@@ -30,13 +39,13 @@ ${staticPages.map(p => `  <url>
   </url>`).join('\n')}
 ${products.map(p => `  <url>
     <loc>${BASE_URL}/product/${p._id}</loc>
-    <lastmod>${new Date(p.updatedAt).toISOString()}</lastmod>
+    <lastmod>${safeIsoDate(p.updatedAt)}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>`).join('\n')}
 ${collections.map(c => `  <url>
     <loc>${BASE_URL}/collections/${c.slug}</loc>
-    <lastmod>${new Date(c.updatedAt).toISOString()}</lastmod>
+    <lastmod>${safeIsoDate(c.updatedAt)}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>`).join('\n')}

@@ -1,9 +1,9 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import ProductCard from '../../components/ProductCard';
 
-export default function ShopPage() {
+function ShopPageContent() {
   const searchParams = useSearchParams();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -112,5 +112,18 @@ export default function ShopPage() {
         )}
       </section>
     </>
+  );
+}
+
+export default function ShopPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--text-muted)' }}>
+        <div className="loader"></div>
+        <p>Loading shop...</p>
+      </div>
+    }>
+      <ShopPageContent />
+    </Suspense>
   );
 }
